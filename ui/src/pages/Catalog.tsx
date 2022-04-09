@@ -1,6 +1,6 @@
 import { daToDate } from '@urbit/api';
 import compareAsc from 'date-fns/compareAsc';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { File } from '../components/File';
@@ -50,7 +50,7 @@ export function Catalog() {
   return (
     <div>
       <Breadcrumb className='mb-4' currentFolder={currentFolder} />
-      <div className='grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] auto-rows-min gap-4'>
+      <div className='grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] auto-rows-min gap-4 pb-24 sm:pb-0'>
         {currentFolder.children.map((child, index) => (
           <Link key={child.path + index} to={`/folder${child.path}`}>
             <Folder name={child.name} />
@@ -61,7 +61,7 @@ export function Catalog() {
             <Link to={`/file/${file.data.Key}`}>
               <File file={file} />
             </Link>
-            <FileActions className='absolute bottom-2 right-2 h-auto opacity-0 group-hover:opacity-100' file={file} />
+            <FileActions className='absolute bottom-2 right-2 hidden sm:block h-auto bg-gray-800 rounded opacity-0 group-hover:opacity-100' file={file} />
           </div>
         ))}
       </div>

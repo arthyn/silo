@@ -5,4 +5,34 @@
   @apply inline-flex items-center w-6 h-6 animate-spin;
 }
 
+.accordion-content {
+  overflow: hidden;
+  
+  &[data-state='open'] {
+    animation: slideup 300ms ease-out forwards;
+  }
+
+  &[data-state='closed'] {
+    animation: slidedown 300ms ease-out forwards;
+  }
+}
+
+@keyframes slideup {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slidedown {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @tailwind utilities;

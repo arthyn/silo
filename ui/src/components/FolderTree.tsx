@@ -9,17 +9,18 @@ interface FolderProps {
   folder: FolderTreeType;
   currentFolder: FolderTreeType;
   topLevelAccordion?: boolean;
+  onClick?: () => void;
 }
 
-const FolderLink = ({ folder, currentFolder }: Omit<FolderProps, 'topLevelAccordion'>) => (
-  <Link className={classnames('flex items-center truncate', folder.path === currentFolder.path && 'font-bold')} to={`/folder${folder.path}`}>
-    {folder.path !== currentFolder.path && <FolderIcon className="w-5 h-5 mr-2 text-indigo-400"/>}
-    {folder.path === currentFolder.path && <FolderOpenIcon className="w-5 h-5 mr-2 text-indigo-400" />}
+const FolderLink = ({ folder, currentFolder, onClick }: Omit<FolderProps, 'topLevelAccordion'>) => (
+  <Link className={classnames('flex items-center mb-2 truncate text-xl sm:text-base', folder.path === currentFolder.path && 'font-bold')} to={`/folder${folder.path}`}>
+    {folder.path !== currentFolder.path && <FolderIcon className="w-6 h-6 sm:w-5 sm:h-5 mr-2 text-indigo-400"/>}
+    {folder.path === currentFolder.path && <FolderOpenIcon className="w-6 h-6 sm:w-5 sm:h-5 mr-2 text-indigo-400" />}
     {folder.name || '/'}
   </Link>
 )
 
-export const FolderTree = ({ folder, currentFolder, topLevelAccordion = false }: FolderProps) => {
+export const FolderTree = ({ folder, currentFolder, topLevelAccordion = false, onClick }: FolderProps) => {
   const collapsible = folder.children.map(child => (
     <FolderTree key={child.path} folder={child} currentFolder={currentFolder} />
   ));
@@ -51,6 +52,6 @@ export const FolderTree = ({ folder, currentFolder, topLevelAccordion = false }:
   }
 
   return (
-    <FolderLink folder={folder} currentFolder={currentFolder} />
+    <FolderLink folder={folder} currentFolder={currentFolder} onClick={onClick} />
   )
 }

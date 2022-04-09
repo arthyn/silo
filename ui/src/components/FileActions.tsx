@@ -59,17 +59,17 @@ export const FileActions = ({ file, className }: FileActionsProps) => {
   }, [url])
 
   return (
-    <ul className={classNames('flex items-center space-x-2 p-1 leading-none text-indigo-300 bg-gray-800 rounded', className)}>
+    <ul className={classNames('flex items-center space-x-2 p-1 leading-none text-indigo-300', className)}>
       <li>
         {!copied && <button onClick={copyUrl} className="hover:text-indigo-500">
-          <LinkIcon className="w-6 h-6" />          
+          <LinkIcon className="w-8 h-8 sm:w-6 sm:h-6" />          
         </button>
         }
         {copied}
       </li>
       <li>
         <button onClick={download} className="hover:text-indigo-500">
-          <DownloadIcon className="w-6 h-6" />
+          <DownloadIcon className="w-8 h-8 sm:w-6 sm:h-6" />
         </button>
       </li>
     </ul>

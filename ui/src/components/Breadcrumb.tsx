@@ -2,8 +2,8 @@ import { FolderOpenIcon, RefreshIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
 import React from "react";
 import { Link } from "react-router-dom";
-import useStorageState from "../state/storage";
-import { FolderTree, useFileStore } from "../state/useFileStore";
+import { FolderTree } from "../state/useFileStore";
+import { Refresh } from "./Refresh";
 
 interface BreadcrumbProps {
   currentFolder: FolderTree;
@@ -39,8 +39,6 @@ const BreadCrumbItem = ({
 
 export const Breadcrumb = ({ currentFolder, className }: BreadcrumbProps) => {
   const { path, pathSegments } = currentFolder;
-  const { s3 } = useStorageState();
-  const { getFiles } = useFileStore();
 
   return (
     <header className={classNames('flex items-center py-2 mt-18 border-b-2 border-gray-200', className)}>
@@ -54,10 +52,7 @@ export const Breadcrumb = ({ currentFolder, className }: BreadcrumbProps) => {
           </ol>
         </nav>
       </div>
-      <button onClick={() => getFiles(s3)} className="p-1 ml-auto text-indigo-400 hover:text-indigo-600 active:rotate-180 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
-        <RefreshIcon className="w-6 h-6" />
-        <span className="sr-only">Refresh files</span>
-      </button>
+      <Refresh className='hidden sm:block ml-auto' />
     </header>
   )
 }

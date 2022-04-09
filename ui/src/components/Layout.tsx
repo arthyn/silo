@@ -11,7 +11,7 @@ export const Layout: FunctionComponent = ({ children }) => {
   } = useDropZone();
   return (
     <main 
-      className="relative p-8"
+      className="relative p-4 sm:p-8"
       onDrop={onDrop}
       onDragEnter={onDragEnter}
       onDragOver={onDragLeave}

@@ -1,6 +1,7 @@
+import { ArrowLeftIcon } from '@heroicons/react/solid';
 import React, { useEffect } from 'react';
 import { defaultStyles, FileIcon } from 'react-file-icon';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { FileActions } from '../components/FileActions';
 import { isImage, isVideo } from '../lib/file';
@@ -54,13 +55,12 @@ export const Details = () => {
   return (
     <section className='space-y-6'>
       <Breadcrumb currentFolder={currentFolder} />
-      <div className='grid grid-rows-[minmax(0,1fr),auto] h-[calc(100vh-8.25rem)] rounded-2xl'>
+      <div className='grid grid-rows-[minmax(0,1fr),auto] h-[calc(100vh-12.75rem)] sm:h-[calc(100vh-8.25rem)] rounded-2xl'>
         <div className='relative group flex flex-col items-center justify-center p-6 pb-12 bg-indigo-100 rounded-2xl rounded-b-none'>
           {showImage && <img className='max-h-full max-w-full object-contain' src={currentFile.url} />}
           {showVideo && <video src={currentFile.url} controls />}
           {showIcon && <span className='w-40'><FileIcon extension={currentFile.extension} {...defaultStyles[currentFile.extension]} /></span>}
           <h1 className='absolute bottom-2 max-w-full mt-4 text-lg lg:text-xl leading-none font-semibold break-all'>{currentFile.filenameMinusDate}</h1>
-          <FileActions className='absolute bottom-2 right-2 h-auto opacity-0 group-hover:opacity-100' file={currentFile} />
         </div>
         <footer className='grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-6 w-full h-full p-6 bg-gray-100 rounded-2xl rounded-t-none'>
           <div>
@@ -75,8 +75,15 @@ export const Details = () => {
             <h2 className='gray-500'>last modified</h2>
             <p><strong>{currentFile.data.LastModified && new Date(currentFile.data.LastModified).toLocaleString()}</strong></p>
           </div>
+          <div className="col-span-full mt-4 pt-4 border-t-2 border-gray-200">
+            <FileActions file={currentFile} />
+          </div>
         </footer>
       </div>
+      <Link to="-1" className='inline-flex items-center font-semibold text-gray-600'>
+        <ArrowLeftIcon className='w-4 h-4 mr-1 text-gray-400' />
+        Back
+      </Link>
     </section>
   )
 }
