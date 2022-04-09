@@ -55,7 +55,7 @@ export const Details = () => {
   return (
     <section className='space-y-6'>
       <Breadcrumb currentFolder={currentFolder} />
-      <div className='grid grid-rows-[minmax(0,1fr),auto] h-[calc(100vh-12.75rem)] sm:h-[calc(100vh-8.25rem)] rounded-2xl'>
+      <div className='grid grid-rows-[minmax(0,1fr),auto] h-[calc(100vh-13.5rem)] sm:h-[calc(100vh-8.25rem)] rounded-2xl'>
         <div className='relative group flex flex-col items-center justify-center p-6 pb-12 bg-indigo-100 rounded-2xl rounded-b-none'>
           {showImage && <img className='max-h-full max-w-full object-contain' src={currentFile.url} />}
           {showVideo && <video src={currentFile.url} controls />}

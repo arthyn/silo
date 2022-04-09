@@ -1,7 +1,7 @@
-import { MenuAlt1Icon } from '@heroicons/react/solid';
+import { CogIcon, MenuAlt1Icon } from '@heroicons/react/solid';
 import * as Accordion from '@radix-ui/react-accordion';
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import create from 'zustand';
 import { FolderTree as FolderTreeType, useFileStore } from '../state/useFileStore';
 import { useDropZone } from '../upload/DropZone';
@@ -37,13 +37,17 @@ export const SidebarLayout = () => {
   const { isOpen, toggle } = useMobileNav();
 
   return (
-    <div className='sm:grid gap-6 grid-cols-[minmax(max-content,320px),1fr] min-h-screen'>
+    <div className='sm:grid gap-6 grid-cols-[minmax(max-content,320px),1fr] h-full'>
       <aside>
         <div className="sticky top-8 hidden sm:block max-w-xl">
           <h1 className="text-3xl font-bold mb-1">silo</h1>
-          <nav className='mb-4'>
+          <nav className='mb-6'>
             <FolderTree folder={folders} currentFolder={currentFolder} topLevelAccordion/>
           </nav>
+          <Link to="/settings" className='flex items-center mb-4 font-semibold text-gray-600 hover:underline'>
+            <CogIcon className='w-5 h-5 mr-2 text-indigo-300' />
+            Settings
+          </Link>
           <UploadButton />
         </div>
       </aside>
@@ -53,9 +57,13 @@ export const SidebarLayout = () => {
           <Accordion.Item value="mobile-nav">
             <Accordion.Content className='accordion-content pb-6'>
               <h1 className="text-3xl font-bold mb-1">silo</h1>
-              <nav className='mb-10'>
+              <nav className='mb-4'>
                 <FolderTree folder={folders} currentFolder={currentFolder} topLevelAccordion/>
               </nav>
+              <Link to="/settings" className='flex items-center mb-10 font-semibold text-gray-600'>
+                <CogIcon className='w-5 h-5 mr-2 text-indigo-300' />
+                Settings
+              </Link>
             </Accordion.Content>
             <Accordion.Header className='flex items-center'>
               <UploadButton />

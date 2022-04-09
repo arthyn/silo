@@ -7,9 +7,10 @@ import { useAsyncCall } from './lib/useAsyncCall';
 import { Catalog } from './pages/Catalog';
 import { Details } from './pages/Details';
 import { Empty } from './pages/Empty';
+import { Settings } from './pages/Settings';
 import { api } from './state/api';
 import useStorageState from './state/storage';
-import { prefixEndpoint, useFileStore } from './state/useFileStore';
+import { useFileStore } from './state/useFileStore';
 import { DropZone } from './upload/DropZone';
 
 export function App() {
@@ -17,7 +18,7 @@ export function App() {
     s3
   } = useStorageState();
   const credentials = s3.credentials;
-  const { client, getFiles } = useFileStore();
+  const { client, createClient, getFiles } = useFileStore();
   const { call: loadFiles } = useAsyncCall(useCallback(async (s3) => {
     return getFiles(s3)
   }, []), useFileStore);
@@ -33,12 +34,7 @@ export function App() {
   useEffect(() => {
     const hasCredentials = credentials?.accessKeyId && credentials?.endpoint && credentials?.secretAccessKey;
     if (hasCredentials) {
-      useFileStore.setState({ client: new S3Client({ 
-          endpoint: prefixEndpoint(credentials.endpoint),
-          region: 'us-east-1',
-          credentials
-        }) 
-      });
+      createClient(credentials);
 
       useStorageState.setState({ hasCredentials: true });
       console.log('client initialized')
@@ -66,6 +62,7 @@ export function App() {
             <Route path="folder" element={<Catalog />} />
             <Route path="folder/*" element={<Catalog />} />
             <Route path="file/*" element={<Details />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
       </Routes>

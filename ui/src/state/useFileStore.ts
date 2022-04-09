@@ -1,4 +1,6 @@
 import { ListObjectsV2Command, S3Client, _Object } from '@aws-sdk/client-s3';
+import { awsAuthMiddleware, resolveSigV4AuthConfig } from '@aws-sdk/middleware-signing';
+import { S3Credentials } from '@urbit/api';
 import { DefaultExtensionType } from 'react-file-icon';
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -11,6 +13,7 @@ interface FileStore {
   folders: FolderTree;
   currentFolder: FolderTree;
   currentFile: File | null;
+  createClient: (s3: S3Credentials) => void;
   setCurrentFile: (key: string, folder: FolderTree) => File | undefined;
   getFiles: (s3: StorageState['s3']) => void;
   setFiles: (files: _Object[], s3: StorageState['s3']) => void;
@@ -189,6 +192,27 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
   folders: root,
   currentFolder: root,
   currentFile: null,
+  createClient: (credentials: S3Credentials) => {
+    const client = new S3Client({ 
+      endpoint: prefixEndpoint(credentials.endpoint),
+      region: 'us-east-1',
+      credentials,
+      forcePathStyle: true, // needed with minio?
+    });
+
+    // client.middlewareStack.add(awsAuthMiddleware(resolveSigV4AuthConfig({
+    //   credentials: {
+    //     accessKeyId: credentials.accessKeyId,
+    //     secretAccessKey: credentials.secretAccessKey
+    //   },
+    //   region: 'us-east-1',
+
+    // })), {
+    //   step: 'finalizeRequest',
+    //   priority: 'high'
+    // })
+    set({ client })
+  },
   setCurrentFile: (key: string, folder: FolderTree) => {
     const file = get().files
       .find(file => `${file.folder === '/' ? '' : file.folder}/${file.filename}` === key)
@@ -205,9 +229,11 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
       return;
     }
     
-    const resp = await client.send(new ListObjectsV2Command({
-      Bucket: s3.configuration.currentBucket
-    }));
+    const listObjects = new ListObjectsV2Command({
+      Bucket: s3.configuration.currentBucket,
+    });
+    
+    const resp = await client.send(listObjects);
 
     setFiles(resp.Contents || [], s3);
   },
@@ -253,7 +279,7 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
     })
   }
 }), {
-  name: 'file-store',
+  name: `${window.ship}/${window.desk}/file-store'`,
   partialize: ({ currentFolder, client, currentFile, ...state }) => {
     return state;
   }
