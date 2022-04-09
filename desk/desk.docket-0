@@ -1,7 +1,9 @@
 :~  title+'silo'
     info+'An S3 storage manager'
     color+0x4f.46e5
-    glob-http+['https://hmillerdev.nyc3.digitaloceanspaces.com/silo/glob-0v7.mhhhr.f29lg.jpupu.0r4up.ilsjk.glob' 0v7.mhhhr.f29lg.jpupu.0r4up.ilsjk]
+    glob-http+['https://hmillerdev.nyc3.digitaloceanspaces.com/silo/glob-0v4.23c21.9o1m5.8s0te.f1j6q.9hkpe.glob' 0v4.23c21.9o1m5.8s0te.f1j6q.9hkpe]
     base+'silo'
-    version+[0 0 1]
+    version+[0 0 2]
+    license+''
+    website+''
 ==

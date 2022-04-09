@@ -70,6 +70,10 @@ export function getFileInfo(filepath: string): Omit<File, 'data' | 'ancestors' |
   }
 }
 
+export function prefixEndpoint(endpoint: string) {
+  return endpoint.match(/https?:\/\//) ? endpoint : `https://${endpoint}`;
+}
+
 export function getFileUrl(key: string, s3: StorageState['s3']) {
   const endpoint = s3.credentials?.endpoint;
   if (!endpoint) {
@@ -77,7 +81,8 @@ export function getFileUrl(key: string, s3: StorageState['s3']) {
   }
 
   const normEndpoint = endpoint.slice(-1) === '/' ? endpoint : endpoint + '/';
-  const url = new URL(normEndpoint + key);
+  const withProtocol = prefixEndpoint(normEndpoint);
+  const url = new URL(withProtocol + key);
   url.host = `${s3.configuration.currentBucket}.${url.host}`;
 
   return url.toString();

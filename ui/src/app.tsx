@@ -9,7 +9,7 @@ import { Details } from './pages/Details';
 import { Empty } from './pages/Empty';
 import { api } from './state/api';
 import useStorageState from './state/storage';
-import { useFileStore } from './state/useFileStore';
+import { prefixEndpoint, useFileStore } from './state/useFileStore';
 import { DropZone } from './upload/DropZone';
 
 export function App() {
@@ -34,7 +34,7 @@ export function App() {
     const hasCredentials = credentials?.accessKeyId && credentials?.endpoint && credentials?.secretAccessKey;
     if (hasCredentials) {
       useFileStore.setState({ client: new S3Client({ 
-          endpoint: credentials.endpoint,
+          endpoint: prefixEndpoint(credentials.endpoint),
           region: 'us-east-1',
           credentials
         }) 
