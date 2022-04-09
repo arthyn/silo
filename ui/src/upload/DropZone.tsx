@@ -1,4 +1,3 @@
-import { PutObjectCommand, PutObjectCommandOutput } from '@aws-sdk/client-s3';
 import { dateToDa, deSig } from '@urbit/api';
 import classNames from 'classnames';
 import React, { ChangeEvent, DragEvent, useCallback, useEffect } from 'react';
@@ -13,7 +12,7 @@ export type DropStatus = 'initial' | 'dropping' | 'dropped';
 interface FileUpload {
   file: File;
   status: Status;
-  response: PutObjectCommandOutput | null;
+  response: AWS.S3.PutObjectOutput | null;
 }
 
 interface DropZoneStore {
@@ -86,13 +85,14 @@ export const DropZone = () => {
 
       for (const fileUpload of files) {
         fileUpload.status = 'loading';
-        fileUpload.response = await client.send(new PutObjectCommand({
+        fileUpload.response = await client.putObject({
           Bucket: s3.configuration.currentBucket,
           Key: `${folder}${timestamp}-${fileUpload.file.name}`,
           Body: fileUpload.file,
           ACL: 'public-read',
           ContentType: fileUpload.file.type
-        }))
+        }).promise()
+        
         fileUpload.status = 'success';
       }
 

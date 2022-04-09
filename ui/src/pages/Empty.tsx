@@ -5,8 +5,6 @@ import { addBucket, setAccessKeyId, setCurrentBucket, setEndpoint, setSecretAcce
 import { api } from '../state/api';
 import useStorageState from '../state/storage';
 import { useAsyncCall } from '../lib/useAsyncCall';
-import { useFileStore } from '../state/useFileStore';
-import { Bucket, ListBucketsCommand } from '@aws-sdk/client-s3';
 
 interface CredentialsSubmit {
   endpoint: string;
