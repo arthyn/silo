@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+
+.spinner {
+  @apply inline-flex items-center w-6 h-6 animate-spin;
+}
+
+@tailwind utilities;
