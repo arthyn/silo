@@ -85,10 +85,8 @@ export function getFileUrl(key: string, s3: StorageState['s3']) {
 
   const normEndpoint = endpoint.slice(-1) === '/' ? endpoint : endpoint + '/';
   const withProtocol = prefixEndpoint(normEndpoint);
-  const url = new URL(withProtocol + key);
-  url.host = `${s3.configuration.currentBucket}.${url.host}`;
 
-  return url.toString();
+  return `${withProtocol}${s3.configuration.currentBucket}/${key}`;
 }
 
 export function getFilenameParts(filename: string): { name: string, extension: DefaultExtensionType } {
@@ -193,8 +191,13 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
   currentFolder: root,
   currentFile: null,
   createClient: (credentials: S3Credentials) => {
+    const endpoint = new URL(prefixEndpoint(credentials.endpoint))
     const client = new S3Client({ 
-      endpoint: prefixEndpoint(credentials.endpoint),
+      endpoint: {
+        protocol: endpoint.protocol.slice(0,-1),
+        hostname: endpoint.host,
+        path: endpoint.pathname || '/'
+      },
       region: 'us-east-1',
       credentials,
       forcePathStyle: true, // needed with minio?
