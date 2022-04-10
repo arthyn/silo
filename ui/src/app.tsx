@@ -1,3 +1,4 @@
+import { S3Client } from '@aws-sdk/client-s3';
 import React, { useCallback, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';

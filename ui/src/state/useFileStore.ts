@@ -1,4 +1,5 @@
-import AWS from 'aws-sdk'
+import { ListObjectsV2Command, S3Client, _Object } from '@aws-sdk/client-s3';
+import { awsAuthMiddleware, resolveSigV4AuthConfig } from '@aws-sdk/middleware-signing';
 import { S3Credentials } from '@urbit/api';
 import { DefaultExtensionType } from 'react-file-icon';
 import create from 'zustand';
@@ -6,7 +7,7 @@ import { persist } from 'zustand/middleware';
 import { StorageState } from './storage';
 
 interface FileStore {
-  client: AWS.S3 | null;
+  client: S3Client | null;
   status: 'initial' | 'loading' | 'success' | 'error';
   files: File[];
   folders: FolderTree;
@@ -15,11 +16,11 @@ interface FileStore {
   createClient: (s3: S3Credentials) => void;
   setCurrentFile: (key: string, folder: FolderTree) => File | undefined;
   getFiles: (s3: StorageState['s3']) => void;
-  setFiles: (files: AWS.S3.Object[], s3: StorageState['s3']) => void;
+  setFiles: (files: _Object[], s3: StorageState['s3']) => void;
 }
 
 export interface File {
-  data: AWS.S3.Object;
+  data: _Object;
   url: string;
   filename: string;
   filenameMinusDate: string;
@@ -84,8 +85,10 @@ export function getFileUrl(key: string, s3: StorageState['s3']) {
 
   const normEndpoint = endpoint.slice(-1) === '/' ? endpoint : endpoint + '/';
   const withProtocol = prefixEndpoint(normEndpoint);
+  const url = new URL(withProtocol + key);
+  url.host = `${s3.configuration.currentBucket}.${url.host}`;
 
-  return `${withProtocol}${s3.configuration.currentBucket}/${key}`;
+  return url.toString();
 }
 
 export function getFilenameParts(filename: string): { name: string, extension: DefaultExtensionType } {
@@ -190,12 +193,11 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
   currentFolder: root,
   currentFile: null,
   createClient: (credentials: S3Credentials) => {
-    const client = new AWS.S3({ 
+    const client = new S3Client({ 
       endpoint: prefixEndpoint(credentials.endpoint),
       region: 'us-east-1',
       credentials,
-      s3ForcePathStyle: true, // needed with minio?
-      signatureVersion: 'v4'
+      forcePathStyle: true, // needed with minio?
     });
 
     // client.middlewareStack.add(awsAuthMiddleware(resolveSigV4AuthConfig({
@@ -226,14 +228,16 @@ export const useFileStore = create<FileStore>(persist((set, get) => ({
     if (!client || !s3.configuration.currentBucket) {
       return;
     }
-
-    const resp = await client.listObjects({
-      Bucket: s3.configuration.currentBucket
-    }).promise();
+    
+    const listObjects = new ListObjectsV2Command({
+      Bucket: s3.configuration.currentBucket,
+    });
+    
+    const resp = await client.send(listObjects);
 
     setFiles(resp.Contents || [], s3);
   },
-  setFiles: (newFiles: AWS.S3.Object[], s3: StorageState['s3']) => {
+  setFiles: (newFiles: _Object[], s3: StorageState['s3']) => {
     let tree = get().folders;
     const files = newFiles.map(file => {
       const key = file.Key || '';

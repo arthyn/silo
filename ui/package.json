@@ -16,7 +16,6 @@
     "@radix-ui/react-accordion": "^0.1.6",
     "@urbit/api": "^2.1.0",
     "@urbit/http-api": "^2.1.0",
-    "aws-sdk": "^2.1111.0",
     "buffer": "^6.0.3",
     "classnames": "^2.3.1",
     "copy-to-clipboard": "^3.3.1",
