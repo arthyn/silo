@@ -359,6 +359,7 @@ export const useFileStore = create<FileStore>(
               Bucket: bucket,
               CopySource: `${bucket}/${file.data.Key}`,
               Key: key,
+              ACL: "public-read"
             }))
           }, async (error) => {
             const res = await fetch(getFileUrl(file.data.Key || '', s3), {
@@ -375,7 +376,8 @@ export const useFileStore = create<FileStore>(
             return client.send(new PutObjectCommand({
               Bucket: bucket,
               Key: key,
-              Body: await res.blob()
+              Body: await res.blob(),
+              ACL: "public-read"
             }));
           });
           debugger;
