@@ -40,7 +40,7 @@ const FolderLink = ({
   add: () => void;
   onDrop?: (file: File, folder: FolderTreeType) => void;
 }) => {
-  const [{ isOver }, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop<{ file: File }, void, { isOver: boolean }>({
     accept: dragTypes.file,
     drop: ({ file }) => {
       onDrop && onDrop(file, folder);

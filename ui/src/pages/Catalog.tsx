@@ -24,7 +24,7 @@ export const dragTypes = {
 
 const FolderLink = ({ folder, s3 }: { folder: FolderTree; s3: StorageState['s3'] }) => {
   const { moveFile } = useFileStore()
-  const [{ isOver }, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop<{ file: FileType }, void, { isOver: boolean } >({
     accept: dragTypes.file,
     drop: ({ file }) => {
       moveFile(file, folder, s3);

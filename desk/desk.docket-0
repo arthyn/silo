@@ -1,9 +1,9 @@
 :~  title+'silo'
     info+'An S3 storage manager'
     color+0x4f.46e5
-    glob-http+['https://hmillerdev.nyc3.digitaloceanspaces.com/silo/glob-0v6.f649g.tqu6r.4furg.h2me8.nvd5l.glob' 0v6.f649g.tqu6r.4furg.h2me8.nvd5l]
+    glob-http+['https://hmillerdev.nyc3.digitaloceanspaces.com/silo/glob-0v4.4t187.0vnaa.gqoah.hvm3l.8c4ch.glob' 0v4.4t187.0vnaa.gqoah.hvm3l.8c4ch]
     base+'silo'
-    version+[0 0 5]
+    version+[0 1 0]
     license+''
-    website+''
+    website+'web+urbitgraph://group/~nocsyx-lassul/silo'
 ==
