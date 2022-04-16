@@ -1,9 +1,9 @@
-import { DownloadIcon, LinkIcon } from "@heroicons/react/solid";
+import { DownloadIcon, LinkIcon, TrashIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useState } from "react";
 import useStorageState from "../state/storage";
-import { File, getFileUrl } from "../state/useFileStore";
+import { File, getFileUrl, useFileStore } from "../state/useFileStore";
 
 interface FileActionsProps {
   file: File;
@@ -40,8 +40,13 @@ function downloadResource(url: string, filename: string) {
 
 export const FileActions = ({ file, className }: FileActionsProps) => {
   const { s3 } = useStorageState();
+  const { deleteFile } = useFileStore();
   const url = getFileUrl(file.data.Key || '', s3);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const remove = useCallback(() => {
+    return deleteFile(file, s3);
+  }, [file, s3]);
   
   const download = useCallback(async () => {
     return downloadResource(url, file.filename);
@@ -70,6 +75,11 @@ export const FileActions = ({ file, className }: FileActionsProps) => {
       <li>
         <button onClick={download} className="hover:text-indigo-500">
           <DownloadIcon className="w-8 h-8 sm:w-6 sm:h-6" />
+        </button>
+      </li>
+      <li>
+        <button onClick={remove} className="hover:text-indigo-500">
+          <TrashIcon className="w-8 h-8 sm:w-6 sm:h-6" />
         </button>
       </li>
     </ul>

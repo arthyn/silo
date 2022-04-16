@@ -26,12 +26,11 @@ const BreadCrumbItem = ({
     <li>
       <Link
         to={`/folder${crumbPath}`}
-        className="default-ring group rounded-md"
+        className="default-ring group mr-1 rounded-md"
       >
         {index >= 2 && <span className="mr-1 text-gray-400">/</span>}
         <span
           className={classNames(
-            "mr-1",
             active && "font-semibold text-gray-900",
             !active && "hover:text-indigo-600"
           )}

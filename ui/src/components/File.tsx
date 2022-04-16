@@ -9,7 +9,7 @@ interface FileProps {
 
 export const File = ({ file }: FileProps) => {
   return (
-    <div className="aspect-w-1 aspect-h-1 group-focus:ring-2 ring-offset-2 ring-indigo-500 rounded-xl">
+    <div className="aspect-w-1 aspect-h-1 group-focus-within:ring-2 ring-offset-2 ring-indigo-500 rounded-xl">
       <div>
         {isImage(file.extension) ? (
           <img

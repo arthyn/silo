@@ -1,27 +1,32 @@
-import { S3Client } from '@aws-sdk/client-s3';
-import React, { useCallback, useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import { SidebarLayout } from './components/SidebarLayout';
-import { useAsyncCall } from './lib/useAsyncCall';
-import { Catalog } from './pages/Catalog';
-import { Details } from './pages/Details';
-import { Empty } from './pages/Empty';
-import { Settings } from './pages/Settings';
-import { api } from './state/api';
-import useStorageState from './state/storage';
-import { useFileStore } from './state/useFileStore';
-import { DropZone } from './upload/DropZone';
+import React, { useCallback, useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { DndProvider } from "react-dnd";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { Layout } from "./components/Layout";
+import { SidebarLayout } from "./components/SidebarLayout";
+import { useAsyncCall } from "./lib/useAsyncCall";
+import { Catalog } from "./pages/Catalog";
+import { Details } from "./pages/Details";
+import { Empty } from "./pages/Empty";
+import { Settings } from "./pages/Settings";
+import { api } from "./state/api";
+import useStorageState from "./state/storage";
+import { useFileStore } from "./state/useFileStore";
+import { DropZone } from "./upload/DropZone";
+import { useMedia } from "./lib/useMedia";
 
 export function App() {
-  const {
-    s3
-  } = useStorageState();
+  const { s3 } = useStorageState();
   const credentials = s3.credentials;
   const { client, createClient, getFiles } = useFileStore();
-  const { call: loadFiles } = useAsyncCall(useCallback(async (s3) => {
-    return getFiles(s3)
-  }, []), useFileStore);
+  const { call: loadFiles } = useAsyncCall(
+    useCallback(async (s3) => {
+      return getFiles(s3);
+    }, []),
+    useFileStore
+  );
+  const isMobile = useMedia("(pointer: coarse)");
 
   useEffect(() => {
     async function init() {
@@ -32,41 +37,58 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    const hasCredentials = credentials?.accessKeyId && credentials?.endpoint && credentials?.secretAccessKey;
+    const hasCredentials =
+      credentials?.accessKeyId &&
+      credentials?.endpoint &&
+      credentials?.secretAccessKey;
     if (hasCredentials) {
       createClient(credentials);
 
       useStorageState.setState({ hasCredentials: true });
-      console.log('client initialized')
+      console.log("client initialized");
     }
-  }, [credentials])
+  }, [credentials]);
 
   useEffect(() => {
-      loadFiles(s3);
+    loadFiles(s3);
 
-      // const interval = setInterval(() => {
-      //   loadFiles(s3);
-      // }, 30 * 1000)
+    // const interval = setInterval(() => {
+    //   loadFiles(s3);
+    // }, 30 * 1000)
 
-      // return () => {
-      //   clearInterval(interval);
-      // }
-  }, [loadFiles, s3, client])
+    // return () => {
+    //   clearInterval(interval);
+    // }
+  }, [loadFiles, s3, client]);
 
   return (
-    <BrowserRouter basename='/apps/silo'>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Empty />} />
-          <Route element={<SidebarLayout />}>
-            <Route path="folder" element={<Catalog />} />
-            <Route path="folder/*" element={<Catalog />} />
-            <Route path="file/*" element={<Details />} />
-            <Route path="settings" element={<Settings />} />
+    <DndProvider
+      backend={isMobile ? TouchBackend : HTML5Backend}
+      options={
+        isMobile
+          ? {
+              delay: 50,
+              scrollAngleRanges: [
+                { start: 30, end: 150 },
+                { start: 210, end: 330 },
+              ],
+            }
+          : undefined
+      }
+    >
+      <BrowserRouter basename="/apps/silo">
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Empty />} />
+            <Route element={<SidebarLayout />}>
+              <Route path="folder" element={<Catalog />} />
+              <Route path="folder/*" element={<Catalog />} />
+              <Route path="file/*" element={<Details />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-      <DropZone />
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </DndProvider>
   );
 }

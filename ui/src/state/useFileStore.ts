@@ -1,4 +1,6 @@
 import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
   PutObjectCommandOutput,
@@ -9,6 +11,7 @@ import { S3Credentials } from "@urbit/api";
 import { DefaultExtensionType } from "react-file-icon";
 import create from "zustand";
 import { persist } from "zustand/middleware";
+import { runWithAsyncHandling } from "../lib/util";
 import { StorageState } from "./storage";
 
 export interface FileStore {
@@ -22,6 +25,8 @@ export interface FileStore {
   setCurrentFile: (key: string, folder: FolderTree) => File | undefined;
   getFiles: (s3: StorageState["s3"]) => void;
   setFiles: (files: _Object[], s3: StorageState["s3"]) => void;
+  deleteFile: (file: File, s3: StorageState["s3"]) => Promise<void>;
+  moveFile: (file: File, folder: FolderTree, s3: StorageState['s3']) => Promise<void>;
   addFolder: (folder: FolderTree) => void;
   removeEditingFolder: () => void;
   makeFolder: (
@@ -256,17 +261,6 @@ export const useFileStore = create<FileStore>(
           forcePathStyle: true, // needed with minio?
         });
 
-        // client.middlewareStack.add(awsAuthMiddleware(resolveSigV4AuthConfig({
-        //   credentials: {
-        //     accessKeyId: credentials.accessKeyId,
-        //     secretAccessKey: credentials.secretAccessKey
-        //   },
-        //   region: 'us-east-1',
-
-        // })), {
-        //   step: 'finalizeRequest',
-        //   priority: 'high'
-        // })
         set({ client });
       },
       setCurrentFile: (key: string, folder: FolderTree) => {
@@ -327,12 +321,78 @@ export const useFileStore = create<FileStore>(
             };
           })
           .filter((file) => file !== null) as File[];
-
-        // console.log('final tree', tree)
         set({
           files,
           folders: tree,
         });
+      },
+      deleteFile: async (file: File, s3: StorageState['s3']) => {
+        const { client, files, currentFile } = get();
+        if (!client) {
+          return;
+        }
+
+        const index = files.findIndex(f => f.data.Key === file.data.Key);
+        files.splice(index, 1);
+
+        const current = currentFile === file ? null : currentFile;
+
+        set({ files: ([] as File[]).concat(files), currentFile: current })
+
+        await client.send(new DeleteObjectCommand({
+          Bucket: s3.configuration.currentBucket,
+          Key: file.data.Key
+        }))
+      },
+      moveFile: async (file: File, folder: FolderTree, s3: StorageState['s3']) => {
+        const { client, currentFile } = get();
+        const bucket = s3.configuration.currentBucket;
+
+        if (!client) {
+          return;
+        }
+
+        try {
+          const key = `${folder.path.slice(1)}/${file.filename}`;
+          await runWithAsyncHandling(() => {
+            return client.send(new CopyObjectCommand({
+              Bucket: bucket,
+              CopySource: `${bucket}/${file.data.Key}`,
+              Key: key,
+            }))
+          }, async (error) => {
+            const res = await fetch(getFileUrl(file.data.Key || '', s3), {
+              mode: 'cors',
+              headers: {
+                'Accept': '*/*'
+              }
+            });
+            if (!res) {
+              throw error;
+            }
+
+            debugger;
+            return client.send(new PutObjectCommand({
+              Bucket: bucket,
+              Key: key,
+              Body: await res.blob()
+            }));
+          });
+          debugger;
+          await client.send(new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: file.data.Key
+          }))
+
+          file.folder = folder.path;
+          const current = currentFile === file ? null : currentFile;
+          set(state => ({ files: ([] as File[]).concat(state.files), currentFile: current }))
+
+          setTimeout(() => {
+            get().getFiles(s3)
+          }, 100);
+        } catch (error) {
+        }
       },
       addFolder: (folder: FolderTree) => {
         if (folder.children.find((c) => c.editing)) {

@@ -1,12 +1,15 @@
-import { ArrowLeftIcon } from '@heroicons/react/solid';
-import React, { useEffect } from 'react';
+import { ArrowLeftIcon, ReplyIcon } from '@heroicons/react/solid';
+import React, { useEffect, useState } from 'react';
 import { defaultStyles, FileIcon } from 'react-file-icon';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import * as Popover from '@radix-ui/react-popover';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { FileActions } from '../components/FileActions';
 import { isImage, isVideo } from '../lib/file';
 import { useS3Redirect } from '../lib/useS3Redirect';
 import { getFileInfo, traverseTree, useFileStore } from '../state/useFileStore';
+import { FolderTree } from '../components/FolderTree';
+import useStorageState from '../state/storage';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -24,24 +27,36 @@ export const Details = () => {
   useS3Redirect();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { currentFile, currentFolder, folders, setCurrentFile } = useFileStore();
+  const { s3 } = useStorageState();
+  const { 
+    currentFile, 
+    currentFolder, 
+    folders, 
+    setCurrentFile,
+    moveFile
+  } = useFileStore();
+  const [moveMenuOpen, setMoveMenuOpen] = useState(false);
 
   useEffect(() => {
     const normPath = decodeURIComponent(pathname.replace('/file', ''))
     const { folder, filename } = getFileInfo(normPath);
     const nextFolder = traverseTree(folder, folders);
 
-    if (nextFolder && filename !== '') {
+    if (nextFolder && filename !== '' && !currentFile) {
       const file = setCurrentFile(normPath, nextFolder);
       if (file) {
         return;
       } else {
-        navigate('/')    
+        navigate(`/folder${folder}`)    
       }
     }
 
-    navigate('/')
-  }, [pathname, folders]);
+    if (currentFile) {
+      return;
+    }
+
+    navigate(`/folder${folder}`)
+  }, [pathname, folders, currentFile]);
 
 
   if (!currentFile) {
@@ -75,7 +90,26 @@ export const Details = () => {
             <h2 className='gray-500'>last modified</h2>
             <p><strong>{currentFile.data.LastModified && new Date(currentFile.data.LastModified).toLocaleString()}</strong></p>
           </div>
-          <div className="col-span-full mt-4 pt-4 border-t-2 border-gray-200">
+          <div className="col-span-full flex items-center mt-4 pt-4 border-t-2 border-gray-200">
+            <Popover.Root>
+              <Popover.Trigger className='mr-2 text-indigo-300 hover:text-indigo-500'>
+                <ReplyIcon className='w-8 h-8 sm:w-6 sm:h-6' />
+              </Popover.Trigger>
+              <Popover.Content className='p-6 rounded-xl bg-white border border-indigo-200'>
+                <FolderTree 
+                  type="action" 
+                  folder={folders} 
+                  currentFolder={currentFolder} 
+                  topLevelAccordion 
+                  allOpen 
+                  onClick={(folder) => {
+                    moveFile(currentFile, folder, s3)
+                    navigate(`/folder/${folder.path}`)
+                  }}
+                />
+                <Popover.Arrow className='fill-current text-indigo-200'/>
+              </Popover.Content>
+            </Popover.Root>
             <FileActions file={currentFile} />
           </div>
         </footer>
