@@ -3,7 +3,6 @@ import compareAsc from "date-fns/compareAsc";
 import { useDrag, useDrop } from "react-dnd";
 import React, { useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Breadcrumb } from "../components/Breadcrumb";
 import { File } from "../components/File";
 import { FileActions } from "../components/FileActions";
 import { Folder } from "../components/Folder";
@@ -17,10 +16,22 @@ import {
   useFileStore,
 } from "../state/useFileStore";
 import classNames from "classnames";
+import create from "zustand";
+import { useMedia } from "../lib/useMedia";
+import { Header } from "../components/Header";
+import { Paginator } from "../components/Paginator";
 
 export const dragTypes = {
   file: "FILE",
 };
+
+interface CatalogStore {
+  pageSize: number;
+}
+
+const useCatalog = create<CatalogStore>((set, get) => ({
+  pageSize: 100
+}))
 
 const FolderLink = ({ folder, s3 }: { folder: FolderTree; s3: StorageState['s3'] }) => {
   const { moveFile } = useFileStore()
@@ -47,7 +58,7 @@ const FolderLink = ({ folder, s3 }: { folder: FolderTree; s3: StorageState['s3']
   )
 };
 
-const FileLink = ({ file }: { file: FileType }) => {
+const FileLink = ({ file, lazy = true }: { file: FileType; lazy?: boolean }) => {
   const [, drag] = useDrag({
     type: dragTypes.file,
     item: { file },
@@ -56,7 +67,7 @@ const FileLink = ({ file }: { file: FileType }) => {
   return (
     <div ref={drag} className="relative group">
       <Link className="focus:outline-none" to={`/file/${file.data.Key}`}>
-        <File file={file} />
+        <File file={file} lazy={lazy}/>
       </Link>
       <FileActions
         className="absolute bottom-2 right-2 hidden sm:flex h-auto bg-gray-800 rounded opacity-0 group-hover:opacity-100 peer-active:opacity-0"
@@ -69,8 +80,12 @@ const FileLink = ({ file }: { file: FileType }) => {
 export function Catalog() {
   useS3Redirect();
   const { pathname } = useLocation();
+  const match = pathname.replace(/\/page\/\d+/, '').match(/^\/folder\/(.*)/);
+  const page = pathname.match(/\/page\/(\d+)/)?.[1];
   const { s3 } = useStorageState();
+  const isMobile = useMedia('(max-width: 639px), (pointer: coarse)');
   const { files, folders, currentFolder, status } = useFileStore();
+  const { pageSize } = useCatalog();
   const filteredFiles = useMemo(() => {
     return files
       .filter((file) => file.folder === currentFolder.path)
@@ -85,9 +100,23 @@ export function Catalog() {
         return compareAsc(dateA, dateB);
       });
   }, [currentFolder, files]);
+  const total = filteredFiles.length;
+	const pages =
+		total % pageSize === 0
+			? total / pageSize
+			: Math.floor(total / pageSize) + 1;
+  const pageInt = parseInt(page || '1', 10) - 1;
+  const start = pageInt * pageSize;
+  const fileSlice = filteredFiles.slice(start, Math.min(start + pageSize, total));
 
   useEffect(() => {
-    const normPath = pathname.replace("/folder", "");
+    if (isMobile) {
+      useCatalog.setState({ pageSize: 25 });
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    const normPath = pathname.replace("/folder", "").replace(/\/page\/\d+$/, '');
     let nextFolder = traverseTree(normPath ? normPath : "/", folders);
 
     if (nextFolder) {
@@ -106,17 +135,37 @@ export function Catalog() {
 
   return (
     <div>
-      <Breadcrumb className="mb-4" currentFolder={currentFolder} />
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] auto-rows-min gap-4 pb-24 sm:pb-0">
+      <Header className="mb-4" currentFolder={currentFolder} currentPage={pageInt} pages={pages} />
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] auto-rows-min gap-4 mb-10">
         {currentFolder.children.map((child, index) => (
           <FolderLink key={child.path + index} folder={child} s3={s3} />
         ))}
         {s3.credentials?.endpoint &&
           status === "success" &&
-          filteredFiles.map((file, index) => (
-            <FileLink key={(file.data.Key || "") + index} file={file} />
+          fileSlice.map((file, index) => (
+            <FileLink key={(file.data.Key || "") + index} file={file} lazy={isMobile ? index > 8 : index > 24}/>
           ))}
       </div>
+      <footer className="pb-24 sm:pb-0">
+        <nav className={classNames(
+            "border-t border-gray-200 mt-6 px-4 flex items-center sm:px-0",
+            isMobile ? 'justify-center' : 'justify-end'
+          )}
+        >
+          <Paginator 
+            pages={pages} 
+            currentPage={pageInt}
+            pagesShownLimit={isMobile ? 2 : 3}
+            linkBuilder={(page) => {
+              if (!page) {
+                return null;
+              }
+              
+              return `${match?.[1] || ''}/page/${page || 1}`
+            }}
+          />
+        </nav>
+      </footer>
     </div>
   );
 }

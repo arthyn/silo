@@ -81,8 +81,11 @@ export function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Empty />} />
             <Route element={<SidebarLayout />}>
-              <Route path="folder" element={<Catalog />} />
-              <Route path="folder/*" element={<Catalog />} />
+              <Route path="folder">
+                <Route index element={<Catalog />} />
+                <Route path="*" element={<Catalog />} />
+                <Route path="*/page/:page" element={<Catalog />} />
+              </Route>
               <Route path="file/*" element={<Details />} />
               <Route path="settings" element={<Settings />} />
             </Route>

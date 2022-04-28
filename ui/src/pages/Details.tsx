@@ -1,15 +1,15 @@
 import { ArrowLeftIcon, ReplyIcon } from '@heroicons/react/solid';
 import React, { useEffect, useState } from 'react';
 import { defaultStyles, FileIcon } from 'react-file-icon';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as Popover from '@radix-ui/react-popover';
-import { Breadcrumb } from '../components/Breadcrumb';
 import { FileActions } from '../components/FileActions';
 import { isImage, isVideo } from '../lib/file';
 import { useS3Redirect } from '../lib/useS3Redirect';
 import { getFileInfo, traverseTree, useFileStore } from '../state/useFileStore';
 import { FolderTree } from '../components/FolderTree';
 import useStorageState from '../state/storage';
+import { Header } from '../components/Header';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -69,7 +69,7 @@ export const Details = () => {
   
   return (
     <section className='space-y-6'>
-      <Breadcrumb currentFolder={currentFolder} />
+      <Header currentFolder={currentFolder} />
       <div className='grid grid-rows-[minmax(0,1fr),auto] h-[calc(100vh-13.5rem)] sm:h-[calc(100vh-8.25rem)] rounded-2xl'>
         <div className='relative group flex flex-col items-center justify-center p-6 pb-12 bg-indigo-100 rounded-2xl rounded-b-none'>
           {showImage && <img className='max-h-full max-w-full object-contain' src={currentFile.url} />}
@@ -114,7 +114,7 @@ export const Details = () => {
           </div>
         </footer>
       </div>
-      <Link to="-1" className='inline-flex items-center font-semibold text-gray-600'>
+      <Link to={`/folder${currentFolder.path}`} className='inline-flex items-center font-semibold text-gray-600'>
         <ArrowLeftIcon className='w-4 h-4 mr-1 text-gray-400' />
         Back
       </Link>

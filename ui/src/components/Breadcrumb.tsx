@@ -1,9 +1,8 @@
-import { FolderOpenIcon, RefreshIcon } from "@heroicons/react/solid";
+import { FolderOpenIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
 import React from "react";
 import { Link } from "react-router-dom";
 import { FolderTree } from "../state/useFileStore";
-import { Refresh } from "./Refresh";
 
 interface BreadcrumbProps {
   currentFolder: FolderTree;
@@ -46,28 +45,20 @@ export const Breadcrumb = ({ currentFolder, className }: BreadcrumbProps) => {
   const { path, pathSegments } = currentFolder;
 
   return (
-    <header
-      className={classNames(
-        "flex items-center py-2 mt-18 border-b-2 border-gray-200",
-        className
-      )}
-    >
-      <div className="flex items-center">
-        <FolderOpenIcon className="w-5 h-5 mr-2 text-indigo-400" />
-        <nav className="text-gray-500" aria-label="breadcrumb">
-          <ol className="flex items-center" role="list">
-            {pathSegments.map((folder, index) => (
-              <BreadCrumbItem
-                key={folder + index}
-                segments={pathSegments}
-                index={index}
-                currentPath={path}
-              />
-            ))}
-          </ol>
-        </nav>
-      </div>
-      <Refresh className="hidden sm:block ml-auto" />
-    </header>
+    <div className="flex items-center">
+      <FolderOpenIcon className="w-5 h-5 mr-2 text-indigo-400" />
+      <nav className="text-gray-500" aria-label="breadcrumb">
+        <ol className="flex items-center" role="list">
+          {pathSegments.map((folder, index) => (
+            <BreadCrumbItem
+              key={folder + index}
+              segments={pathSegments}
+              index={index}
+              currentPath={path}
+            />
+          ))}
+        </ol>
+      </nav>
+    </div>
   );
 };

@@ -33,11 +33,15 @@ const FolderLink = ({
   open,
   folder,
   add,
+  remove,
+  showRemove,
   onDrop
 }: {
   open: boolean;
+  showRemove: boolean;
   folder: FolderTreeType;
   add: () => void;
+  remove: () => void;
   onDrop?: (file: File, folder: FolderTreeType) => void;
 }) => {
   const [{ isOver }, drop] = useDrop<{ file: File }, void, { isOver: boolean }>({
@@ -70,7 +74,7 @@ const FolderLink = ({
       </Link>
       <button
         className={classNames(
-          "icon-button ml-6 sm:ml-3 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 peer-focus:opacity-100"
+          "icon-button p-1 ml-6 sm:ml-3 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 peer-focus:opacity-100"
           // open && "opacity-100"
         )}
         onClick={add}
@@ -78,6 +82,16 @@ const FolderLink = ({
         <FolderAddIcon className="w-6 h-6 sm:w-5 sm:h-5" />
         <span className="sr-only">Make New Folder</span>
       </button>
+      {showRemove && <button
+        className={classNames(
+          "icon-button p-1 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 peer-focus:opacity-100"
+          // open && "opacity-100"
+        )}
+        onClick={remove}
+      >
+        <FolderRemoveIcon className="w-6 h-6 sm:w-5 sm:h-5" />
+        <span className="sr-only">Remove Folder</span>
+      </button>}
     </div>
   );
 }
@@ -107,7 +121,14 @@ export const FolderTree = ({
   onClick,
 }: FolderProps) => {
   const { s3 } = useStorageState();
-  const { addFolder, makeFolder, moveFile, removeEditingFolder } = useFileStore();
+  const { 
+    addFolder,
+    hasFiles,
+    makeFolder, 
+    moveFile, 
+    removeEditingFolder,
+    removeFolder
+  } = useFileStore();
   const open = folder.path === currentFolder.path;
 
   const move = useCallback((file: File, folder: FolderTreeType) => {
@@ -131,12 +152,16 @@ export const FolderTree = ({
 
   const FolderLeaf = () => (
     <>
-      {type === 'nav' && <FolderLink
-        open={!!hasEditing(folder) || open}
-        folder={folder}
-        add={() => addFolder(folder)}
-        onDrop={move}
-      />}
+      {type === 'nav' && (
+        <FolderLink
+          open={!!hasEditing(folder) || open}
+          showRemove={!hasFiles(folder)}
+          folder={folder}
+          add={() => addFolder(folder)}
+          remove={() => removeFolder(folder, s3)}
+          onDrop={move}
+        />
+      )}
       {type === 'action' && <FolderButton folder={folder} onClick={onClick} />}
     </>
   )

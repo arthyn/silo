@@ -7,6 +7,7 @@ import useStorageState from '../state/storage';
 import { useAsyncCall } from '../lib/useAsyncCall';
 import { useFileStore } from '../state/useFileStore';
 import { Bucket, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { Spinner } from '../components/Spinner';
 
 interface CredentialsSubmit {
   endpoint: string;
@@ -52,6 +53,19 @@ export const Empty = () => {
 
   if (loaded && hasCredentials && s3.configuration.currentBucket) {
     return <Navigate to={'/folder'} />
+  }
+
+  debugger;
+
+  if (!loaded && (!hasCredentials || !s3.configuration.currentBucket)) {
+    return (
+      <section className='flex flex-col items-center justify-center min-h-screen'>
+        <div className='flex items-center space-x-3'>
+          <Spinner className='w-8 h-8 text-indigo-500' />
+          <h1 className="text-3xl font-bold">silo</h1>
+        </div>
+      </section>
+    );
   }
 
   return (

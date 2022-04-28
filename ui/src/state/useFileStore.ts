@@ -2,6 +2,7 @@ import {
   CopyObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
+  paginateListObjectsV2,
   PutObjectCommand,
   PutObjectCommandOutput,
   S3Client,
@@ -27,7 +28,9 @@ export interface FileStore {
   setFiles: (files: _Object[], s3: StorageState["s3"]) => void;
   deleteFile: (file: File, s3: StorageState["s3"]) => Promise<void>;
   moveFile: (file: File, folder: FolderTree, s3: StorageState['s3']) => Promise<void>;
+  hasFiles: (folder: FolderTree) => boolean;
   addFolder: (folder: FolderTree) => void;
+  removeFolder: (folder: FolderTree, s3: StorageState["s3"]) => void;
   removeEditingFolder: () => void;
   makeFolder: (
     key: string,
@@ -231,6 +234,10 @@ export function traverseTree(
   }
 }
 
+// function pruneTree(tree: FolderTree, files: File[]): FolderTree {
+
+// }
+
 const root = {
   name: "/",
   path: "/",
@@ -281,22 +288,34 @@ export const useFileStore = create<FileStore>(
           return;
         }
 
-        const listObjects = new ListObjectsV2Command({
+        // const listObjects = new ListObjectsV2Command({
+        //   Bucket: s3.configuration.currentBucket,
+        // });
+
+        // const resp = await client.send(listObjects);
+
+        const paginator = paginateListObjectsV2({
+          client,
+          pageSize: 1000,
+        }, {
           Bucket: s3.configuration.currentBucket,
         });
 
-        const resp = await client.send(listObjects);
+        const files = [];
+        for await (const page of paginator) {
+          files.push(...(page.Contents || []))
+        }
 
-        setFiles(resp.Contents || [], s3);
+        setFiles(files, s3);
       },
       setFiles: (newFiles: _Object[], s3: StorageState["s3"]) => {
-        let tree = get().folders;
+        let tree: FolderTree = root;
         const files = newFiles
           .map((file) => {
             const key = file.Key || "";
             const { folder, filename, ...info } = getFileInfo(key);
             const newTree = parseFolderIntoTree(splitPath(folder));
-
+            console.log(key);
             // console.log('new tree', JSON.stringify(newTree));
 
             if (newTree) {
@@ -321,6 +340,7 @@ export const useFileStore = create<FileStore>(
             };
           })
           .filter((file) => file !== null) as File[];
+
         set({
           files,
           folders: tree,
@@ -372,7 +392,6 @@ export const useFileStore = create<FileStore>(
               throw error;
             }
 
-            debugger;
             return client.send(new PutObjectCommand({
               Bucket: bucket,
               Key: key,
@@ -380,7 +399,7 @@ export const useFileStore = create<FileStore>(
               ACL: "public-read"
             }));
           });
-          debugger;
+
           await client.send(new DeleteObjectCommand({
             Bucket: bucket,
             Key: file.data.Key
@@ -395,6 +414,9 @@ export const useFileStore = create<FileStore>(
           }, 100);
         } catch (error) {
         }
+      },
+      hasFiles: (folder: FolderTree) => {
+        return get().files.some(file => file.folder === folder.path);
       },
       addFolder: (folder: FolderTree) => {
         if (folder.children.find((c) => c.editing)) {
@@ -411,9 +433,43 @@ export const useFileStore = create<FileStore>(
 
         set({ folders: { ...get().folders } });
       },
+      removeFolder: async (folder: FolderTree, s3: StorageState["s3"]) => {
+        const { client, getFiles, hasFiles, folders, currentFolder } = get();
+
+        if (!client) {
+          return;
+        }
+
+        if (hasFiles(folder)) {
+          throw new Error('Can\'t delete folders with files');
+        }
+        debugger;
+
+        const parentPath = normalizeRoot(folder.path).split('/').slice(0, -1).join('/');
+        const parent = traverseTree(`/${parentPath}`, folders);
+        if (!parent) {
+          return;
+        }
+
+        const index = parent.children.findIndex((c) => c.path === folder.path);
+        if (index < 0) {
+          return;
+        }
+
+        const current = currentFolder === folder ? folders : currentFolder;
+
+        parent.children.splice(index, 1);
+        set({ folders: { ...folders }, currentFolder: current });
+
+        await client.send(new DeleteObjectCommand({
+          Bucket: s3.configuration.currentBucket,
+          Key: folder.path.slice(1) + '/'
+        }))
+
+        getFiles(s3);
+      },
       removeEditingFolder: () => {
         const { folders } = get();
-        debugger;
         const editingFolder = searchTree(folders, (tree) => tree.editing);
         if (!editingFolder) {
           return;
@@ -452,7 +508,7 @@ export const useFileStore = create<FileStore>(
         return client.send(
           new PutObjectCommand({
             Bucket: bucket,
-            Key: folderPath + "/",
+            Key: normalizeRoot(folderPath) + "/",
             ACL: "public-read",
           })
         );

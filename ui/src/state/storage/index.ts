@@ -30,6 +30,8 @@ export interface StorageState {
   };
 }
 
+let numLoads = 0;
+
 // @ts-ignore investigate zustand types
 const useStorageState = createState<StorageState>(
   'Storage',
@@ -73,7 +75,11 @@ const useStorageState = createState<StorageState>(
         if (d) {
           reduceStateN(get(), d, reduce);
         }
-        set({ loaded: true });
+
+        numLoads++;
+        if (numLoads === 2) {
+          set({ loaded: true });
+        }
       })
   ]
 );

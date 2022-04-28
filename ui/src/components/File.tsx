@@ -5,9 +5,10 @@ import { isImage } from "../lib/file";
 
 interface FileProps {
   file: FileType;
+  lazy?: boolean;
 }
 
-export const File = ({ file }: FileProps) => {
+export const File = ({ file, lazy = true }: FileProps) => {
   return (
     <div className="aspect-w-1 aspect-h-1 group-focus-within:ring-2 ring-offset-2 ring-indigo-500 rounded-xl">
       <div>
@@ -15,7 +16,7 @@ export const File = ({ file }: FileProps) => {
           <img
             className="w-full h-full object-cover rounded-xl"
             src={file.url}
-            loading="lazy"
+            loading={lazy ? 'lazy' : 'eager'}
           />
         ) : (
           <div className="grid grid-cols-1 grid-rows-[1fr,auto,1fr] items-center justify-center h-full px-4">
