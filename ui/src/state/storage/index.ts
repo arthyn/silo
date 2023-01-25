@@ -25,6 +25,7 @@ export interface StorageState {
     configuration: {
       buckets: Set<string>;
       currentBucket: string;
+      region: string;
     };
     credentials: S3Credentials | null;
   };
@@ -62,7 +63,8 @@ const useStorageState = createState<StorageState>(
     s3: {
       configuration: {
         buckets: new Set(),
-        currentBucket: ''
+        currentBucket: '',
+        region: ''
       },
       credentials: null
     }

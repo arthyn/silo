@@ -13,12 +13,13 @@ import { Settings } from "./pages/Settings";
 import { api } from "./state/api";
 import useStorageState from "./state/storage";
 import { useFileStore } from "./state/useFileStore";
-import { DropZone } from "./upload/DropZone";
 import { useMedia } from "./lib/useMedia";
+import { isDev } from "./lib/util";
 
 export function App() {
   const { s3 } = useStorageState();
   const credentials = s3.credentials;
+  const configuration = s3.configuration;
   const { client, createClient, getFiles } = useFileStore();
   const { call: loadFiles } = useAsyncCall(
     useCallback(async (s3) => {
@@ -40,14 +41,14 @@ export function App() {
     const hasCredentials =
       credentials?.accessKeyId &&
       credentials?.endpoint &&
-      credentials?.secretAccessKey;
+      credentials?.secretAccessKey && configuration;
     if (hasCredentials) {
-      createClient(credentials);
+      createClient(credentials, configuration.region);
 
       useStorageState.setState({ hasCredentials: true });
-      console.log("client initialized");
+      isDev && console.log("client initialized");
     }
-  }, [credentials]);
+  }, [credentials, configuration]);
 
   useEffect(() => {
     loadFiles(s3);

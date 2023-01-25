@@ -1,3 +1,5 @@
+export const isDev = import.meta.env.DEV;
+
 export async function runWithAsyncHandling<RunReturn, HandlerReturn>(
   run: () => RunReturn, 
   handler: (error: Error) => HandlerReturn): Promise<RunReturn | HandlerReturn> {

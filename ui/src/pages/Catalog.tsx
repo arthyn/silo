@@ -1,5 +1,4 @@
 import { daToDate } from "@urbit/api";
-import compareAsc from "date-fns/compareAsc";
 import { useDrag, useDrop } from "react-dnd";
 import React, { useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -20,6 +19,7 @@ import create from "zustand";
 import { useMedia } from "../lib/useMedia";
 import { Header } from "../components/Header";
 import { Paginator } from "../components/Paginator";
+import { compareDesc } from "date-fns";
 
 export const dragTypes = {
   file: "FILE",
@@ -44,8 +44,6 @@ const FolderLink = ({ folder, s3 }: { folder: FolderTree; s3: StorageState['s3']
       isOver: monitor.isOver()
     })
   });
-
-  console.log('isover', isOver)
 
   return (
     <Link
@@ -97,7 +95,7 @@ export function Catalog() {
           ? daToDate("~" + b.date)
           : new Date(b.data.LastModified || "");
 
-        return compareAsc(dateA, dateB);
+        return compareDesc(dateA, dateB);
       });
   }, [currentFolder, files]);
   const total = filteredFiles.length;

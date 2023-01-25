@@ -12,7 +12,7 @@ import { S3Credentials } from "@urbit/api";
 import { DefaultExtensionType } from "react-file-icon";
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { runWithAsyncHandling } from "../lib/util";
+import { isDev, runWithAsyncHandling } from "../lib/util";
 import { StorageState } from "./storage";
 
 export interface FileStore {
@@ -22,7 +22,7 @@ export interface FileStore {
   folders: FolderTree;
   currentFolder: FolderTree;
   currentFile: File | null;
-  createClient: (s3: S3Credentials) => void;
+  createClient: (s3: S3Credentials, region: string) => void;
   setCurrentFile: (key: string, folder: FolderTree) => File | undefined;
   getFiles: (s3: StorageState["s3"]) => void;
   setFiles: (files: _Object[], s3: StorageState["s3"]) => void;
@@ -107,8 +107,8 @@ export function getFileUrl(key: string, s3: StorageState["s3"]) {
 
   const normEndpoint = endpoint.slice(-1) === "/" ? endpoint : endpoint + "/";
   const withProtocol = prefixEndpoint(normEndpoint);
-
-  return `${withProtocol}${s3.configuration.currentBucket}/${key}`;
+  const end = key.split('/').map(encodeURIComponent).join('/');
+  return `${withProtocol}${s3.configuration.currentBucket}/${end}`;
 }
 
 export function getFilenameParts(filename: string): {
@@ -255,7 +255,7 @@ export const useFileStore = create<FileStore>(
       folders: root,
       currentFolder: root,
       currentFile: null,
-      createClient: (credentials: S3Credentials) => {
+      createClient: (credentials: S3Credentials, region: string) => {
         const endpoint = new URL(prefixEndpoint(credentials.endpoint));
         const client = new S3Client({
           endpoint: {
@@ -263,7 +263,7 @@ export const useFileStore = create<FileStore>(
             hostname: endpoint.host,
             path: endpoint.pathname || "/",
           },
-          region: "us-east-1",
+          region: region || "us-east-1",
           credentials,
           forcePathStyle: true, // needed with minio?
         });
@@ -315,14 +315,12 @@ export const useFileStore = create<FileStore>(
             const key = file.Key || "";
             const { folder, filename, ...info } = getFileInfo(key);
             const newTree = parseFolderIntoTree(splitPath(folder));
-            console.log(key);
-            // console.log('new tree', JSON.stringify(newTree));
+            isDev && console.log(key);
 
             if (newTree) {
               const mergedTrees = mergeTrees(tree, newTree);
               if (mergedTrees) {
                 tree = mergedTrees;
-                // console.log('merged trees', JSON.stringify(mergedTrees, null, 2));
               }
             }
 

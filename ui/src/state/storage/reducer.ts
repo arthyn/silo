@@ -18,7 +18,8 @@ const configuration = (json: S3Update, state: StorageState): StorageState => {
   if (data) {
     state.s3.configuration = {
       buckets: new Set(data.buckets),
-      currentBucket: data.currentBucket
+      currentBucket: data.currentBucket,
+      region: data.region
     };
   }
   return state;

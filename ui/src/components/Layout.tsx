@@ -3,6 +3,7 @@ import { useDrop } from "react-dnd";
 import { NativeTypes } from "react-dnd-html5-backend";
 import { Outlet } from "react-router-dom";
 import { Status } from "../lib/useAsyncCall";
+import { isDev } from "../lib/util";
 import { DropZone, FileUpload, useDropZone } from "../upload/DropZone";
 
 export const Layout: FunctionComponent = ({ children }) => {
@@ -32,7 +33,7 @@ export const Layout: FunctionComponent = ({ children }) => {
 
   useEffect(() => {
     if (!isOver && status !== "dropped" && status !== "open") {
-      console.log("setting initial", isOver, status);
+      isDev && console.log("setting initial", isOver, status);
       useDropZone.setState({ status: "initial" });
     }
   }, [isOver, status]);

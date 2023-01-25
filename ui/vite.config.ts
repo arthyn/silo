@@ -9,6 +9,6 @@ export default ({ mode }) => {
   console.log(SHIP_URL);
 
   return defineConfig({
-    plugins: [urbitPlugin({ base: 'silo', target: SHIP_URL, secure: false }), reactRefresh()]
+    plugins: [urbitPlugin({ base: 'silo', target: SHIP_URL, changeOrigin: true, secure: false }), reactRefresh()]
   });
 };
