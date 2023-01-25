@@ -14,6 +14,7 @@ interface CredentialsSubmit {
   accessId: string;
   accessSecret: string;
   bucket: string;
+  region: string;
 }
 
 export const Empty = () => {
@@ -30,6 +31,11 @@ export const Empty = () => {
     api.poke(setSecretAccessKey(data.accessSecret));
     api.poke(addBucket(data.bucket));
     api.poke(setCurrentBucket(data.bucket))
+    api.poke({
+      app: 's3-store',
+      mark: 's3-action',
+      json: { 'set-region': data.region },
+    });
   }, []));
 
   // const setBucket = async (data: CredentialsSubmit) => {
@@ -106,6 +112,13 @@ export const Empty = () => {
               <label htmlFor="bucket" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Bucket</label>
               <div className="mt-1 sm:mt-0 sm:col-span-2">
                 <input type="text" {...register('bucket')} id="bucket" className="block max-w-lg w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" />
+              </div>
+            </div>
+
+            <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
+              <label htmlFor="endpoint" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Region</label>
+              <div className="mt-1 sm:mt-0 sm:col-span-2">
+                <input type="text" {...register('region')} id="region" className="block max-w-lg w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" />
               </div>
             </div>
           </div>
