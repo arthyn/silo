@@ -3,7 +3,7 @@
     color+0x4f.46e5
     glob-http+['https://hmillerdev.nyc3.digitaloceanspaces.com/silo/glob-0v3.63863.kqu55.103hq.tfv4b.cpt2a.glob' 0v3.63863.kqu55.103hq.tfv4b.cpt2a]
     base+'silo'
-    version+[0 2 1]
+    version+[0 2 0]
     license+''
     website+'web+urbitgraph://group/~nocsyx-lassul/silo'
 ==
