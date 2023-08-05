@@ -1,0 +1,40 @@
+name: 'glob'
+description: 'Create a glob and push to develop'
+inputs:
+  folder:
+    description: "Folder to glob"
+    required: true
+  docket:
+    description: "Docket file to edit"
+    required: true
+  access_key:
+    description: "S3 access key"
+    required: true
+  secret_key:
+    description: "S3 secret key"
+    required: true
+outputs:
+  hash:
+    description: "Glob hash"
+    value: ${{ steps.glob.outputs.hash }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set up S3cmd cli tool
+      uses: s3-actions/s3cmd@v1.4.0
+      with:
+        provider: digitalocean
+        region: nyc3
+        access_key: ${{ inputs.access_key }}
+        secret_key: ${{ inputs.secret_key }}
+    - id: glob
+      shell: bash
+      run:
+        ./.github/helpers/glob.sh "${{ inputs.folder }}" ${{ inputs.docket }}
+    - name: Upload Glob and Cleanup
+      shell: bash
+      run: |
+        ls -al /home/runner
+        s3cmd put zod/.urb/put/*.glob -P s3://hmillerdev/silo/
+        sleep 5s
+        rm -rf zod
