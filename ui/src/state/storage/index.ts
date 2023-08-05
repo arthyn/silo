@@ -72,8 +72,8 @@ const useStorageState = createState<StorageState>(
   ['loaded', 's3', 'gcp'],
   [
     (set, get) =>
-      createSubscription('s3-store', '/all', (e) => {
-        const d = _.get(e, 's3-update', false);
+      createSubscription('storage', '/all', (e) => {
+        const d = _.get(e, 'storage-update', false);
         if (d) {
           reduceStateN(get(), d, reduce);
         }
