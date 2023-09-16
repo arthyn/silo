@@ -1,7 +1,7 @@
 :~  title+'silo'
     info+'An S3 storage manager'
     color+0x4f.46e5
-    glob-http+['https://nyc3.digitaloceanspaces.com/hmillerdev/silo/glob-0v4.dlp6d.i5k38.on46i.bhui2.no8m9.glob' 0v4.dlp6d.i5k38.on46i.bhui2.no8m9]
+    glob-http+['https://nyc3.digitaloceanspaces.com/hmillerdev/silo/glob-0v4.i275m.pdgtj.r3vlg.f93u4.e49d5.glob' 0v4.i275m.pdgtj.r3vlg.f93u4.e49d5]
     base+'silo'
     version+[0 4 0]
     license+''
