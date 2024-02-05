@@ -1,11 +1,11 @@
 import { RefreshIcon } from '@heroicons/react/solid';
 import classNames from 'classnames';
 import React from 'react';
-import useStorageState from '../state/storage';
+import { useStorage } from "../state/storage";
 import { useFileStore } from '../state/useFileStore';
 
 export const Refresh = ({ className }: { className?: string }) => {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { getFiles } = useFileStore();
   
   return (

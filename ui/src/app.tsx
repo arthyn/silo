@@ -11,13 +11,13 @@ import { Details } from "./pages/Details";
 import { Empty } from "./pages/Empty";
 import { Settings } from "./pages/Settings";
 import { api } from "./state/api";
-import useStorageState from "./state/storage";
+import { useStorage } from "./state/storage";
 import { useFileStore } from "./state/useFileStore";
 import { useMedia } from "./lib/useMedia";
 import { isDev } from "./lib/util";
 
 export function App() {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const credentials = s3.credentials;
   const configuration = s3.configuration;
   const { client, createClient, getFiles } = useFileStore();
@@ -31,7 +31,7 @@ export function App() {
 
   useEffect(() => {
     async function init() {
-      useStorageState.getState().initialize(api);
+      useStorage.getState().initialize(api);
     }
 
     init();
@@ -45,7 +45,7 @@ export function App() {
     if (hasCredentials) {
       createClient(credentials, configuration.region);
 
-      useStorageState.setState({ hasCredentials: true });
+      useStorage.setState({ hasCredentials: true });
       isDev && console.log("client initialized");
     }
   }, [credentials, configuration]);

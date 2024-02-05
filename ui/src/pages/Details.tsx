@@ -8,7 +8,7 @@ import { isImage, isVideo } from '../lib/file';
 import { useS3Redirect } from '../lib/useS3Redirect';
 import { getFileInfo, traverseTree, useFileStore } from '../state/useFileStore';
 import { FolderTree } from '../components/FolderTree';
-import useStorageState from '../state/storage';
+import { useStorage } from "../state/storage";
 import { Header } from '../components/Header';
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -27,7 +27,7 @@ export const Details = () => {
   useS3Redirect();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { 
     currentFile, 
     currentFolder, 

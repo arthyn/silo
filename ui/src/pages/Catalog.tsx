@@ -7,7 +7,7 @@ import { FileActions } from "../components/FileActions";
 import { Folder } from "../components/Folder";
 import { Spinner } from "../components/Spinner";
 import { useS3Redirect } from "../lib/useS3Redirect";
-import useStorageState, { StorageState } from "../state/storage";
+import { useStorage, StorageState } from "../state/storage";
 import {
   File as FileType,
   FolderTree,
@@ -80,7 +80,7 @@ export function Catalog() {
   const { pathname } = useLocation();
   const match = pathname.replace(/\/page\/\d+/, '').match(/^\/folder\/(.*)/);
   const page = pathname.match(/\/page\/(\d+)/)?.[1];
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const isMobile = useMedia('(max-width: 639px), (pointer: coarse)');
   const { files, folders, currentFolder, status } = useFileStore();
   const { pageSize } = useCatalog();

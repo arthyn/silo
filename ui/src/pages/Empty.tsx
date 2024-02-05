@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
-import { addBucket, setAccessKeyId, setCurrentBucket, setEndpoint, setSecretAccessKey } from '@urbit/api';
+import { addBucket, setAccessKeyId, setCurrentBucket, setEndpoint, setSecretAccessKey } from '../state/storage/lib';
 import { api } from '../state/api';
-import useStorageState from '../state/storage';
+import { useStorage } from "../state/storage";
 import { useAsyncCall } from '../lib/useAsyncCall';
-import { useFileStore } from '../state/useFileStore';
-import { Bucket, ListBucketsCommand } from '@aws-sdk/client-s3';
 import { Spinner } from '../components/Spinner';
 
 interface CredentialsSubmit {
@@ -18,7 +16,7 @@ interface CredentialsSubmit {
 }
 
 export const Empty = () => {
-  const { hasCredentials, s3, loaded } = useStorageState();
+  const { hasCredentials, s3, loaded } = useStorage();
   // const credentials = s3.credentials;
   // const { client } = useFileStore();
   // const [buckets, setBuckets] = useState<Bucket[]>();
@@ -32,8 +30,8 @@ export const Empty = () => {
     api.poke(addBucket(data.bucket));
     api.poke(setCurrentBucket(data.bucket))
     api.poke({
-      app: 's3-store',
-      mark: 's3-action',
+      app: 'storage',
+      mark: 'storage-action',
       json: { 'set-region': data.region },
     });
   }, []));

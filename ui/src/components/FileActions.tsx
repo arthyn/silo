@@ -2,7 +2,7 @@ import { DownloadIcon, LinkIcon, TrashIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useState } from "react";
-import useStorageState from "../state/storage";
+import { useStorage } from "../state/storage";
 import { File, getFileUrl, useFileStore } from "../state/useFileStore";
 
 interface FileActionsProps {
@@ -39,7 +39,7 @@ function downloadResource(url: string, filename: string) {
 }
 
 export const FileActions = ({ file, className }: FileActionsProps) => {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { deleteFile } = useFileStore();
   const url = getFileUrl(file.data.Key || '', s3);
   const [copied, setCopied] = useState<string | null>(null);

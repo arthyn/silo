@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { addBucket, setAccessKeyId, setCurrentBucket, setEndpoint, setSecretAccessKey } from '@urbit/api';
+import { addBucket, setAccessKeyId, setCurrentBucket, setEndpoint, setSecretAccessKey } from '../state/storage/lib';
 import { api } from '../state/api';
-import useStorageState from '../state/storage';
+import { useStorage } from "../state/storage";
 import { useAsyncCall } from '../lib/useAsyncCall';
 
 interface CredentialsSubmit {
@@ -14,8 +14,22 @@ interface CredentialsSubmit {
 }
 
 export const Settings = () => {
-  const { s3 } = useStorageState();
-  const { register, handleSubmit, formState: { errors } } = useForm<CredentialsSubmit>();
+  const { s3 } = useStorage();
+  debugger;
+  const { register, handleSubmit, reset } = useForm<CredentialsSubmit>();
+
+  useEffect(() => {
+    if (s3.credentials && s3.configuration) {
+      reset({
+        endpoint: s3.credentials?.endpoint || '',
+        accessId: s3.credentials?.accessKeyId || '',
+        accessSecret: s3.credentials?.secretAccessKey || '',
+        bucket: s3.configuration.currentBucket,
+        region: s3.configuration?.region || '',
+      })
+    }
+  
+  }, [s3]);
 
   const { call: addS3Credentials, status } = useAsyncCall(useCallback(async (data: CredentialsSubmit) => {
     api.poke(setEndpoint(data.endpoint))
@@ -24,8 +38,8 @@ export const Settings = () => {
     api.poke(addBucket(data.bucket));
     api.poke(setCurrentBucket(data.bucket))
     api.poke({
-      app: 's3-store',
-      mark: 's3-action',
+      app: 'storage',
+      mark: 'storage-action',
       json: { 'set-region': data.region },
     });
   }, []));

@@ -14,7 +14,7 @@ import { defaultStyles, FileIcon } from "react-file-icon";
 import create from "zustand";
 import { Spinner } from "../components/Spinner";
 import { Status } from "../lib/useAsyncCall";
-import useStorageState from "../state/storage";
+import { useStorage } from "../state/storage";
 import { getFilenameParts, useFileStore } from "../state/useFileStore";
 
 export type DropStatus = "initial" | "open" | "dropping" | "dropped";
@@ -36,7 +36,7 @@ export const useDropZone = create<DropZoneStore>(() => ({
 }));
 
 export const DropZone = () => {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { client, currentFolder, getFiles } = useFileStore();
   const { status, files } = useDropZone();
   const dropZone = useRef<HTMLDivElement>(null);

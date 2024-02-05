@@ -11,7 +11,7 @@ import React, { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { Link } from "react-router-dom";
 import { dragTypes } from "../pages/Catalog";
-import useStorageState from "../state/storage";
+import { useStorage } from "../state/storage";
 import {
   File,
   FolderTree as FolderTreeType,
@@ -120,7 +120,7 @@ export const FolderTree = ({
   topLevelAccordion = false,
   onClick,
 }: FolderProps) => {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { 
     addFolder,
     hasFiles,

@@ -1,7 +1,7 @@
 import { FolderIcon, XIcon } from "@heroicons/react/solid";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import useStorageState from "../state/storage";
+import { useStorage } from "../state/storage";
 import { FileStore } from "../state/useFileStore";
 
 interface FolderEditForm {
@@ -17,7 +17,7 @@ export const FolderEdit = ({
   makeFolder,
   removeEditingFolder,
 }: FolderEditProps) => {
-  const { s3 } = useStorageState();
+  const { s3 } = useStorage();
   const { handleSubmit, register } = useForm<FolderEditForm>();
 
   const onSubmit = useCallback(
